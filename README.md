@@ -8,7 +8,7 @@ According to the documentation of FontForge you have to copy the file harmonize_
 `C:\Users\[YOUR USERNAME HERE]\AppData\Roaming\FontForge\python`.
 
 ## New Tools
-After installation, FontForge will show in the Tools menu 4 new entries: "Harmonize", "Harmonize handles" ,"Tunnify (balance)", "Add points of inflection"). The first three tools are all aiming some kind of smoothing the bezier curves and are visualized in the following image:
+After installation, FontForge will show in the Tools menu 4 new entries: "Harmonize", "Harmonize handles" ,"Tunnify (balance)", "Add points of inflection"). The first three tools are all some kind of smoothing the bezier curves. Their effects are visualized in the following image (you will not see the light blue curvature combs in FontForge, they have been added here for documentation reasons):
 
 <img width="1227" alt="dots-all" src="https://user-images.githubusercontent.com/11213578/69477604-826d5b00-0de8-11ea-9aca-a86941c5bf37.png">
 
