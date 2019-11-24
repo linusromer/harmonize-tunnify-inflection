@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#harmonize_tunnify_inflection version 20191122
+#harmonize_tunnify_inflection version 20191124
 
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ C:\Users\[YOUR USERNAME HERE]\AppData\Roaming\FontForge\python
 You then will find "Harmonize" and "Tunnify" in the "Tools" menu.
 """
 
-import fontforge,math
+import fontforge,psMat,math
 
 # Returns the euclidean distance between point a = (ax,ay) 
 # and b = (bx,by).
@@ -59,28 +59,31 @@ def on_same_line(ax,ay,bx,by,cx,cy):
 # q3,r1,r2,c[i+3].
 def split(c,i,t):
 	l = len(c)
-	if 0 < t < 1 and i % 1 == 0 and 0 <= i < l:
-		qx1 = c[i].x + t*(c[(i+1)%l].x-c[i].x)
-		qy1 = c[i].y + t*(c[(i+1)%l].y-c[i].y)
-		qx2 = c[(i+1)%l].x + t*(c[(i+2)%l].x-c[(i+1)%l].x)
-		qy2 = c[(i+1)%l].y + t*(c[(i+2)%l].y-c[(i+1)%l].y)
-		rx2 = c[(i+2)%l].x + t*(c[(i+3)%l].x-c[(i+2)%l].x)
-		ry2 = c[(i+2)%l].y + t*(c[(i+3)%l].y-c[(i+2)%l].y)
+	if 0 < t < 1 and i % 1 == 0 and 0 <= i < l and c[i].on_curve \
+	and not c[i+1].on_curve and not c[i+2].on_curve \
+	and c[(i+3)%l].on_curve:
+		qx1 = c[i].x + t*(c[i+1].x-c[i].x)
+		qy1 = c[i].y + t*(c[i+1].y-c[i].y)
+		qx2 = c[i+1].x + t*(c[i+2].x-c[i+1].x)
+		qy2 = c[i+1].y + t*(c[i+2].y-c[i+1].y)
+		rx2 = c[i+2].x + t*(c[(i+3)%l].x-c[i+2].x)
+		ry2 = c[i+2].y + t*(c[(i+3)%l].y-c[i+2].y)
 		rx1 = qx2 + t*(rx2-qx2)
 		ry1 = qy2 + t*(ry2-qy2)
 		qx2 = qx1 + t*(qx2-qx1)
 		qy2 = qy1 + t*(qy2-qy1)
 		qx3 = qx2 + t*(rx1-qx2)
 		qy3 = qy2 + t*(ry1-qy2)     
-		c[(i+1)%l].x = qx1
-		c[(i+1)%l].y = qy1
-		c[(i+2)%l].x = rx2
-		c[(i+2)%l].y = ry2
-		# yes, len(c) has now to be used instead of l
-		# because len(c) updates after inserting a point
-		c.insertPoint((qx2,qy2,False,0,False),(i+1)%len(c))
-		c.insertPoint((qx3,qy3,True,1,True),(i+2)%len(c))
-		c.insertPoint((rx1,ry1,False,0,False),(i+3)%len(c))		
+		doublesegment = fontforge.contour()
+		doublesegment.moveTo(c[i].x,c[i].y)
+		doublesegment.cubicTo(qx1,qy1,qx2,qy2,qx3,qy3)
+		doublesegment.cubicTo(rx1,ry1,rx2,ry2,c[(i+3)%l].x,c[(i+3)%l].y)
+		if i+3 == l and c.closed: # end point is starting point 
+			c.makeFirst(i)
+			c[0:4] = doublesegment
+			c.makeFirst(l+3-i)
+		else: # generic case
+			c[i:i+4] = doublesegment
 		
 # Returns the corner point c which is the intersection of the
 # lines a1--a2 and b1--b2 or None if there is no intersection.
@@ -141,6 +144,8 @@ def inflection_contour(c,is_glyph_variant):
 			c[(j+2)%l].x,c[(j+2)%l].y,c[(j+3)%l].x,c[(j+3)%l].y)
 			if not t is None:
 				split(c,j,t)
+				if not is_glyph_variant:
+					c[(j+3)%l].selected = True # mark new points
 				j += 3 # we just added 3 points...
 				l += 3 # we just added 3 points...
 			j += 2 # we can jump by 2+1 instead of 1
@@ -184,11 +189,9 @@ def tunnify_contour(c,is_glyph_variant):
 		and c[(j+3)%l].on_curve \
 		and (c[(j+3)%l].selected or is_glyph_variant) \
 		and (j+3)%l != j:
-			c[(j+1)%l].x,c[(j+1)%l].y,c[(j+2)%l].x,c[(j+2)%l].y = tunnify(
-			c[j].x, c[j].y,
-			c[(j+1)%l].x, c[(j+1)%l].y, 
-			c[(j+2)%l].x, c[(j+2)%l].y, 
-			c[(j+3)%l].x, c[(j+3)%l].y)
+			c[(j+1)%l].x,c[(j+1)%l].y,c[(j+2)%l].x,c[(j+2)%l].y = \
+			tunnify(c[j].x, c[j].y,	c[(j+1)%l].x, c[(j+1)%l].y, 
+			c[(j+2)%l].x, c[(j+2)%l].y, c[(j+3)%l].x, c[(j+3)%l].y)
 			j += 2 # we can jump by 2+1 instead of 1
 		j += 1
 			
@@ -221,17 +224,6 @@ def harmonize(a1x,a1y,a2x,a2y,a3x,a3y,b1x,b1y,b2x,b2y):
 	else:
 		return (a3x,a3y)
 
-# This is the harmonize variant, where the handles may move
-# but not the nodes.		
-def harmonize_handles(a1x,a1y,a2x,a2y,a3x,a3y,b1x,b1y,b2x,b2y):
-	ideal = harmonize(a1x,a1y,a2x,a2y,a3x,a3y,b1x,b1y,b2x,b2y)
-	if ideal == (a3x,a3y): # if nothing has changed
-		return (a2x,a2y),(b1x,b1y)
-	else: # this means it can be harmonized
-		deltax = ideal[0]-a3x
-		deltay = ideal[1]-a3y
-		return (a2x-deltax,a2y-deltay),(b1x-deltax,b1y-deltay)
-
 # Harmonizes the nodes of a fontforge contour c.
 # The boolean is_glyph_variant is true iff
 # we do not care whether the points are selected in the UI.
@@ -259,27 +251,17 @@ def harmonize_contour(c,is_glyph_variant,is_handles_variant):
 		and (j+6)%l != j \
 		and on_same_line(c[(j+2)%l].x,c[(j+2)%l].y, \
 		c[(j+3)%l].x,c[(j+3)%l].y,c[(j+4)%l].x,c[(j+4)%l].y):
+			ideal = harmonize(c[(j+1)%l].x, c[(j+1)%l].y, 
+			c[(j+2)%l].x, c[(j+2)%l].y, 
+			c[(j+3)%l].x, c[(j+3)%l].y, 
+			c[(j+4)%l].x, c[(j+4)%l].y, 
+			c[(j+5)%l].x, c[(j+5)%l].y)
+			deltax,deltay = ideal[0]-c[(j+3)%l].x,ideal[1]-c[(j+3)%l].y
 			if is_handles_variant:
-				ha, hb =  harmonize_handles(
-				c[(j+1)%l].x, c[(j+1)%l].y, 
-				c[(j+2)%l].x, c[(j+2)%l].y, 
-				c[(j+3)%l].x, c[(j+3)%l].y, 
-				c[(j+4)%l].x, c[(j+4)%l].y, 
-				c[(j+5)%l].x, c[(j+5)%l].y)
-				# notice, that the fifth argument of fontforge.point
-				# does not work for all versions
-				c[(j+2)%l] = fontforge.point(ha[0],ha[1],False,0,False)
-				c[(j+4)%l] = fontforge.point(hb[0],hb[1],False,0,False)
+				c[(j+2)%l].transform(psMat.translate(-deltax,-deltay))
+				c[(j+4)%l].transform(psMat.translate(-deltax,-deltay))
 			else:
-				h = harmonize(
-				c[(j+1)%l].x, c[(j+1)%l].y, 
-				c[(j+2)%l].x, c[(j+2)%l].y, 
-				c[(j+3)%l].x, c[(j+3)%l].y, 
-				c[(j+4)%l].x, c[(j+4)%l].y, 
-				c[(j+5)%l].x, c[(j+5)%l].y)
-				c[(j+3)%l] = fontforge.point(h[0],h[1],True,1,True)
-				if not is_glyph_variant:
-					c[(j+3)%l].selected = True # we have to tell ff again
+				c[(j+3)%l].transform(psMat.translate(deltax,deltay))
 			j += 3
 		else:
 			j += 1
@@ -288,7 +270,7 @@ def harmonize_contour(c,is_glyph_variant,is_handles_variant):
 # to the selected contours (for glyph view).
 # The string action is either "harmonize", "harmonize_handles",
 # "tunnify" or "inflection".
-def modify_contours(junk,glyph,action):
+def modify_contours(action,glyph):
 	glyph.preserveLayerAsUndo()
 	layer = glyph.layers[glyph.activeLayer]
 	# first, we check, if anything is selected at all
@@ -315,7 +297,7 @@ def modify_contours(junk,glyph,action):
 # to the selected glyphs (for font view).
 # The string action is either "harmonize", "harmonize_handles",
 # "tunnify" or "inflection".
-def modify_glyphs(junk,font,action):
+def modify_glyphs(action,font):
 	for glyph in font.selection.byGlyphs:
 		glyph.preserveLayerAsUndo()
 		layer = glyph.layers[glyph.activeLayer]
@@ -330,30 +312,6 @@ def modify_glyphs(junk,font,action):
 				inflection_contour(layer[i],True)
 		glyph.layers[glyph.activeLayer] = layer
 		
-def harmonize_contours(junk,glyph):
-	modify_contours(junk,glyph,"harmonize")
-	
-def harmonize_handles_contours(junk,glyph):
-	modify_contours(junk,glyph,"harmonize_handles")
-	
-def tunnify_contours(junk,glyph):
-	modify_contours(junk,glyph,"tunnify")
-	
-def inflection_contours(junk,glyph):
-	modify_contours(junk,glyph,"inflection")
-	
-def harmonize_glyphs(junk,font):
-	modify_glyphs(junk,font,"harmonize")
-	
-def harmonize_handles_glyphs(junk,font):
-	modify_glyphs(junk,font,"harmonize_handles")
-	
-def tunnify_glyphs(junk,font):
-	modify_glyphs(junk,font,"tunnify")
-	
-def inflection_glyphs(junk,font):
-	modify_glyphs(junk,font,"inflection")
-	
 # Returns false iff no glyph is selected 
 # (needed for enabling in tools menu).
 def are_glyphs_selected(junk,font):
@@ -368,11 +326,11 @@ def are_contours_selected(junk,font):
 
 # Registers the tools in the tools menu of FontForge.
 if fontforge.hasUserInterface():
-	fontforge.registerMenuItem(harmonize_glyphs,are_glyphs_selected,None,"Font",None,"Harmonize");
-	fontforge.registerMenuItem(harmonize_handles_glyphs,are_glyphs_selected,None,"Font",None,"Harmonize handles");
-	fontforge.registerMenuItem(tunnify_glyphs,are_glyphs_selected,None,"Font",None,"Tunnify (balance)");
-	fontforge.registerMenuItem(inflection_glyphs,are_glyphs_selected,None,"Font",None,"Add points of inflection");
-	fontforge.registerMenuItem(harmonize_contours,are_contours_selected,None,"Glyph",None,"Harmonize");
-	fontforge.registerMenuItem(harmonize_handles_contours,are_contours_selected,None,"Glyph",None,"Harmonize handles");
-	fontforge.registerMenuItem(tunnify_contours,are_contours_selected,None,"Glyph",None,"Tunnify (balance)");
-	fontforge.registerMenuItem(inflection_contours,are_contours_selected,None,"Glyph",None,"Add points of inflection");
+	fontforge.registerMenuItem(modify_glyphs,are_glyphs_selected,"harmonize","Font",None,"Harmonize");
+	fontforge.registerMenuItem(modify_glyphs,are_glyphs_selected,"harmonize_handles","Font",None,"Harmonize handles");
+	fontforge.registerMenuItem(modify_glyphs,are_glyphs_selected,"tunnify","Font",None,"Tunnify (balance)");
+	fontforge.registerMenuItem(modify_glyphs,are_glyphs_selected,"inflection","Font",None,"Add points of inflection");
+	fontforge.registerMenuItem(modify_contours,are_contours_selected,"harmonize","Glyph",None,"Harmonize");
+	fontforge.registerMenuItem(modify_contours,are_contours_selected,"harmonize_handles","Glyph",None,"Harmonize handles");
+	fontforge.registerMenuItem(modify_contours,are_contours_selected,"tunnify","Glyph",None,"Tunnify (balance)");
+	fontforge.registerMenuItem(modify_contours,are_contours_selected,"inflection","Glyph",None,"Add points of inflection");
