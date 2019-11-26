@@ -1,32 +1,31 @@
 #!/usr/bin/env python
 
-#harmonize_tunnify_inflection version 20191124
+# harmonize_tunnify_inflection version 20191126
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This is a FontForge plug-in to harmonize or tunnify 
+# or add inflection points to the selected parts.
+# Installation: FontForge says that you have to copy the file to 
+# $(PREFIX)/share/fontforge/python or ~/.FontForge/python
+# but for me (on Linux) it works at
+# ~/.config/fontforge/python
+# and for Windows it might be at
+# C:\Users\[YOUR USERNAME HERE]\AppData\Roaming\FontForge\python
+# You then will find "Harmonize" and "Tunnify" in the "Tools" menu.
 
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-#You should have received a copy of the GNU General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 
-#Copyright 2019 by Linus Romer
-"""
-harmonize_tunnify_inflection.py is a FontForge plug-in to 
-harmonize or tunnify or add inflection points to the selected parts.
-Installation: FontForge says that you have to copy the file to 
-$(PREFIX)/share/fontforge/python or ~/.FontForge/python
-but for me (on Linux) it works at
-~/.config/fontforge/python
-and for Windows it might be at
-C:\Users\[YOUR USERNAME HERE]\AppData\Roaming\FontForge\python
-You then will find "Harmonize" and "Tunnify" in the "Tools" menu.
-"""
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# Copyright 2019 by Linus Romer
 
 import fontforge,psMat,math
 
