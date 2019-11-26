@@ -2,7 +2,7 @@
 A FontForge plug-in to harmonize or tunnify or add inflection points to the selected parts.
 
 ## Prerequisites
-You must have installed Python along with FontForge. 
+Under Linux you must have installed Python along with FontForge. Under Windows FontForge embeds an own version of Python. Hence, you do not have to install Python additionaly.
 
 ## Installation
 According to the documentation of FontForge you have to copy the file harmonize_tunnify_inflection.py to 
