@@ -13,9 +13,12 @@ According to the documentation of FontForge you have to copy the file harmonize_
 ## New Tools added by harmonize-tunnify-inflection
 After installation, FontForge will show in the Tools menu 4 new entries: "Harmonize", "Harmonize handles" ,"Tunnify (balance)", "Add points of inflection". The first three tools are all some kind of smoothing the bezier curves. Their effects are visualized in the following image (you will not see the light blue curvature combs in FontForge, they have been added here for documentation reasons):
 
-<img width="1227" alt="dots-all" src="https://user-images.githubusercontent.com/11213578/69477604-826d5b00-0de8-11ea-9aca-a86941c5bf37.png">
+![curvature-comb-doc1](https://user-images.githubusercontent.com/11213578/69705892-bf8e6180-10f6-11ea-8548-98135bf1b28e.png)
 
 The last tool ("Add points of inflection") adds points of inflection (FontForge can natively display them but not natively add them):
 
-<img width="420" alt="inflection-all" src="https://user-images.githubusercontent.com/11213578/69477605-826d5b00-0de8-11ea-8baf-bf3b87c4c836.png">
+![curvature-comb-doc2](https://user-images.githubusercontent.com/11213578/69705891-bef5cb00-10f6-11ea-9ccd-5f4a0c57fd9f.png)
+
+
+
 
