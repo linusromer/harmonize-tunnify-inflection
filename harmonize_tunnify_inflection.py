@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# harmonize_tunnify_inflection version 20191126
+# harmonize_tunnify_inflection version 20191201
 
 # This is a FontForge plug-in to harmonize or tunnify 
 # or add inflection points to the selected parts.
@@ -78,9 +78,10 @@ def split(c,i,t):
 		doublesegment.cubicTo(qx1,qy1,qx2,qy2,qx3,qy3)
 		doublesegment.cubicTo(rx1,ry1,rx2,ry2,c[(i+3)%l].x,c[(i+3)%l].y)
 		if i+3 == l and c.closed: # end point is starting point 
-			c.makeFirst(i)
+			c.reverseDirection() # dirty hack because ff2017 is buggy
+			doublesegment.reverseDirection()
 			c[0:4] = doublesegment
-			c.makeFirst(l+3-i)
+			c.reverseDirection()
 		else: # generic case
 			c[i:i+4] = doublesegment
 		
