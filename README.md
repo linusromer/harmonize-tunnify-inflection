@@ -1,6 +1,8 @@
 # harmonize-tunnify-inflection
 A FontForge plug-in to harmonize or tunnify or add inflection points to the selected parts. 
 This is the predecessor to the [Curvatura](https://github.com/linusromer/curvatura) plugin.
+I strongly recommend using [Curvatura](https://github.com/linusromer/curvatura) over `harmonize-tunnify-inflection`
+because `harmonize-tunnify-inflection` will not be updated.
 
 ## Prerequisites
 On Linux you must have installed Python along with FontForge. On Windows FontForge embeds an own version of Python. Hence, you do not have to install Python additionaly.
